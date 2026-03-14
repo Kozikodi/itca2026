@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ITCA 2026 – Admin</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+:root {
+  --bg:#f7f7f8; --white:#fff; --ink:#1c1c1e; --muted:#6e6e73;
+  --border:#d8d8dc; --accent:#1d6fde; --dgreen:#2e8b57; --red:#c62828;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--ink); font-size:15px; }
+
+nav {
+  background:var(--ink); display:flex; align-items:center;
+  padding:0 1.5rem; position:sticky; top:0; z-index:100;
+}
+.nav-brand { font-weight:700; font-size:0.95rem; color:white; padding:1rem 1.5rem 1rem 0; border-right:1px solid #ffffff22; margin-right:1rem; }
+.nav-tab { padding:1rem 1.25rem; font-size:0.85rem; font-weight:500; color:#ffffff77; cursor:pointer; border:none; background:none; border-bottom:2px solid transparent; transition:all 0.15s; white-space:nowrap; font-family:'Inter',sans-serif; }
+.nav-tab:hover { color:white; }
+.nav-tab.active { color:white; border-bottom-color:var(--accent); }
+.badge { display:inline-block; background:var(--accent); color:white; font-size:0.65rem; font-weight:700; padding:0.1rem 0.4rem; border-radius:99px; margin-left:0.35rem; vertical-align:middle; }
+
+.panel { display:none; }
+.panel.active { display:block; }
+
+.container { max-width:960px; margin:0 auto; padding:2rem 1.25rem; }
+.page-title { font-size:1.5rem; font-weight:700; margin-bottom:0.25rem; }
+.page-sub { color:var(--muted); font-size:0.88rem; margin-bottom:1.75rem; }
+
+.card { background:var(--white); border:1px solid var(--border); border-radius:10px; padding:1.5rem; margin-bottom:1.25rem; }
+.card-title { font-weight:700; font-size:1rem; margin-bottom:1rem; padding-bottom:0.75rem; border-bottom:1px solid var(--border); }
+
+label.fl { display:block; font-size:0.78rem; font-weight:600; color:var(--muted); margin-bottom:0.35rem; }
+input[type=text], input[type=url], select {
+  width:100%; border:1px solid var(--border); border-radius:6px;
+  padding:0.6rem 0.8rem; font-family:'Inter',sans-serif; font-size:0.92rem;
+  color:var(--ink); background:var(--white); outline:none; transition:border-color 0.15s;
+}
+input:focus, select:focus { border-color:var(--accent); box-shadow:0 0 0 3px #1d6fde1a; }
+.field { margin-bottom:0.85rem; }
+
+.btn { display:inline-flex; align-items:center; gap:0.4rem; padding:0.55rem 1.1rem; border-radius:6px; font-size:0.85rem; font-weight:600; cursor:pointer; border:none; font-family:'Inter',sans-serif; transition:all 0.15s; }
+.btn-primary { background:var(--accent); color:white; }
+.btn-primary:hover { background:#155ec2; }
+.btn-dark { background:var(--ink); color:white; }
+.btn-dark:hover { background:#2d2d35; }
+.btn-outline { background:var(--white); color:var(--ink); border:1px solid var(--border); }
+.btn-outline:hover { background:var(--bg); }
+.btn-green { background:var(--dgreen); color:white; }
+.btn-green:hover { background:#1f5c3a; }
+.btn-red { background:#ffebeb; color:var(--red); border:1px solid #ef9a9a; }
+.btn-red:hover { background:#ffd6d6; }
+
+.station-row { display:grid; grid-template-columns:1fr 1fr auto; gap:0.75rem; align-items:end; padding:0.75rem; background:var(--bg); border-radius:6px; margin-bottom:0.5rem; }
+.candidate-row { display:grid; grid-template-columns:1fr 1fr auto; gap:0.75rem; align-items:end; padding:0.75rem; background:var(--bg); border-radius:6px; margin-bottom:0.5rem; }
+.remove-btn { background:none; border:none; color:var(--muted); cursor:pointer; font-size:1.1rem; padding:0.4rem; border-radius:4px; }
+.remove-btn:hover { color:var(--red); background:#ffebeb; }
+
+/* CONFIG SECTION */
+.config-box { background:#f0f5ff; border:1px solid #b3d1ff; border-radius:8px; padding:1.25rem; margin-bottom:1.25rem; }
+.config-box .config-title { font-weight:700; margin-bottom:0.5rem; color:var(--accent); }
+.config-box .config-note { font-size:0.82rem; color:var(--muted); margin-top:0.5rem; }
+.url-connected { background:#e8f5e9; border-color:#a5d6a7; }
+.url-connected .config-title { color:var(--dgreen); }
+
+/* QR OUTPUT */
+.qr-section-title { font-weight:700; margin-bottom:0.25rem; font-size:1rem; }
+.qr-section-sub { color:var(--muted); font-size:0.82rem; margin-bottom:1rem; }
+.qr-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(175px,1fr)); gap:1rem; margin-bottom:1.5rem; }
+.qr-card { background:var(--white); border:1px solid var(--border); border-radius:8px; padding:1rem; text-align:center; break-inside:avoid; page-break-inside:avoid; }
+.qr-card .qr-wrap { display:flex; justify-content:center; margin-bottom:0.6rem; }
+.qr-card .qr-name { font-weight:700; font-size:0.88rem; }
+.qr-card .qr-sub { font-size:0.72rem; color:var(--muted); font-family:'IBM Plex Mono',monospace; margin-top:0.2rem; }
+.type-badge { display:inline-block; font-size:0.65rem; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; padding:0.15rem 0.45rem; border-radius:4px; margin-bottom:0.5rem; }
+.badge-station { background:#e8eaf6; color:#3949ab; }
+.badge-candidate { background:#fce4ec; color:#c2185b; }
+
+.divider { border:none; border-top:1px solid var(--border); margin:1.5rem 0; }
+
+/* RESULTS */
+.results-toolbar { display:flex; gap:0.75rem; align-items:center; margin-bottom:1.25rem; flex-wrap:wrap; }
+.results-toolbar .spacer { flex:1; }
+.refresh-indicator { font-size:0.8rem; color:var(--muted); }
+
+.result-table { width:100%; border-collapse:collapse; font-size:0.83rem; }
+.result-table th { background:var(--ink); color:white; padding:0.6rem 0.75rem; text-align:left; font-size:0.75rem; font-weight:600; letter-spacing:0.05em; white-space:nowrap; }
+.result-table td { padding:0.6rem 0.75rem; border-bottom:1px solid var(--border); vertical-align:top; }
+.result-table tr:hover td { background:#f0f5ff; }
+.result-table tr:last-child td { border-bottom:none; }
+.score-pill { display:inline-block; padding:0.15rem 0.5rem; border-radius:4px; font-weight:700; font-size:0.75rem; }
+.s4 { background:#ffebeb; color:#c62828; }
+.s5 { background:#fff0e8; color:#bf360c; }
+.s6 { background:#fffde7; color:#827717; }
+.s7 { background:#f0faf0; color:#2e7d32; }
+.s8 { background:#e8f5e9; color:#1b5e20; }
+
+.empty-state { text-align:center; padding:3rem; color:var(--muted); font-size:0.9rem; }
+
+.summary-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:1rem; margin-bottom:1.5rem; }
+.stat-card { background:var(--white); border:1px solid var(--border); border-radius:8px; padding:1rem 1.25rem; }
+.stat-card .stat-label { font-size:0.75rem; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.3rem; }
+.stat-card .stat-value { font-size:1.8rem; font-weight:700; color:var(--ink); }
+.stat-card .stat-sub { font-size:0.78rem; color:var(--muted); margin-top:0.2rem; }
+
+.loading-spinner { display:inline-block; width:16px; height:16px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite; margin-right:0.4rem; vertical-align:middle; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* MODAL */
+.modal-overlay { display:none; position:fixed; inset:0; background:#000000aa; z-index:200; align-items:center; justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--white); border-radius:10px; padding:1.75rem; max-width:500px; width:90%; max-height:90vh; overflow-y:auto; }
+.modal h3 { font-size:1.1rem; font-weight:700; margin-bottom:0.75rem; }
+.modal-actions { display:flex; gap:0.75rem; justify-content:flex-end; margin-top:1.25rem; }
+.modal textarea { width:100%; height:160px; font-family:'IBM Plex Mono',monospace; font-size:0.8rem; border:1px solid var(--border); border-radius:6px; padding:0.6rem; outline:none; }
+.modal textarea:focus { border-color:var(--accent); }
+
+/* PDF MODAL */
+.pdf-modal-overlay { display:none; position:fixed; inset:0; background:#000000bb; z-index:300; align-items:flex-start; justify-content:center; overflow-y:auto; padding:2rem 1rem; }
+.pdf-modal-overlay.open { display:flex; }
+.pdf-modal { background:var(--white); border-radius:10px; width:100%; max-width:720px; overflow:hidden; }
+.pdf-modal-toolbar { background:var(--ink); padding:1rem 1.5rem; display:flex; align-items:center; gap:0.75rem; }
+.pdf-modal-toolbar .pdf-title { color:white; font-weight:700; flex:1; font-size:0.95rem; }
+
+/* REPORT CARD STYLES */
+.report-card { padding:2.5rem; font-family:'Inter',sans-serif; color:#1c1c1e; background:white; }
+.report-header { border-bottom:3px solid #1c1c1e; padding-bottom:1.25rem; margin-bottom:1.75rem; }
+.report-header .rh-title { font-size:1.5rem; font-weight:700; }
+.report-header .rh-sub { font-size:0.88rem; color:#6e6e73; margin-top:0.25rem; }
+.report-header .rh-meta { display:flex; gap:1.5rem; margin-top:0.75rem; font-size:0.85rem; }
+.report-header .rh-meta span { display:flex; flex-direction:column; gap:0.1rem; }
+.report-header .rh-meta .meta-label { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.06em; color:#6e6e73; font-weight:600; }
+.report-header .rh-meta .meta-val { font-weight:700; }
+
+.station-section { border:1px solid #d8d8dc; border-radius:8px; margin-bottom:1.25rem; overflow:hidden; }
+.station-section-header { background:#1c1c1e; color:white; padding:0.75rem 1.25rem; display:flex; align-items:baseline; gap:1rem; }
+.ssh-name { font-weight:700; font-size:1rem; }
+.ssh-examiner { font-size:0.8rem; color:#ffffff88; }
+
+.station-section-body { padding:1.25rem; }
+.question-block { margin-bottom:1.25rem; padding-bottom:1.25rem; border-bottom:1px solid #f0f0f0; }
+.question-block:last-child { margin-bottom:0; padding-bottom:0; border-bottom:none; }
+.qb-title { font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:#6e6e73; margin-bottom:0.75rem; }
+.qb-topic { font-size:0.88rem; font-style:italic; color:#1c1c1e; margin-bottom:0.75rem; }
+
+.scores-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:0.5rem; margin-bottom:0.75rem; }
+.score-box { border-radius:6px; padding:0.5rem 0.6rem; text-align:center; }
+.score-box .sb-label { font-size:0.65rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; opacity:0.75; margin-bottom:0.2rem; }
+.score-box .sb-val { font-size:1.3rem; font-weight:800; line-height:1; }
+.score-box.overall { grid-column:span 4; display:flex; align-items:center; justify-content:space-between; padding:0.6rem 0.8rem; }
+.score-box.overall .sb-val { font-size:1.5rem; }
+
+.sb4  { background:#ffebeb; color:#c62828; }
+.sb5  { background:#fff0e8; color:#bf360c; }
+.sb6  { background:#fffde7; color:#827717; }
+.sb7  { background:#f0faf0; color:#2e7d32; }
+.sb8  { background:#e8f5e9; color:#1b5e20; }
+
+.comments-box { background:#f7f7f8; border-radius:6px; padding:0.75rem 1rem; font-size:0.85rem; line-height:1.6; color:#1c1c1e; margin-top:0.5rem; }
+.comments-label { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#6e6e73; margin-bottom:0.35rem; }
+
+.report-footer { border-top:1px solid #d8d8dc; padding-top:1rem; margin-top:1.5rem; display:flex; justify-content:space-between; font-size:0.75rem; color:#6e6e73; }
+
+/* EMAIL MODAL */
+.email-modal { background:var(--white); border-radius:10px; padding:1.75rem; max-width:460px; width:90%; }
+.email-modal h3 { font-size:1.1rem; font-weight:700; margin-bottom:1rem; }
+
+@media print {
+  /* ── PDF MODE: modal is open ── */
+  body.printing-pdf > *:not(.pdf-modal-overlay) { display:none !important; }
+  body.printing-pdf .pdf-modal-overlay { display:block !important; position:static !important; padding:0 !important; background:none !important; }
+  body.printing-pdf .pdf-modal { display:block !important; border-radius:0 !important; box-shadow:none !important; max-width:100% !important; }
+  body.printing-pdf .pdf-modal-toolbar { display:none !important; }
+
+  /* ── QR MODE: modal is closed ── */
+  body:not(.printing-pdf) nav { display:none !important; }
+  body:not(.printing-pdf) .no-print { display:none !important; }
+  body:not(.printing-pdf) .panel { display:block !important; }
+  body:not(.printing-pdf) #panel-results { display:none !important; }
+  body:not(.printing-pdf) #panel-setup .card:not(:has(.qr-grid)):not(:has(.qr-section-title)) { display:none !important; }
+  body:not(.printing-pdf) .config-box { display:none !important; }
+  body:not(.printing-pdf) details { display:none !important; }
+  body:not(.printing-pdf) .qr-grid { grid-template-columns:repeat(3,1fr) !important; }
+  body:not(.printing-pdf) .qr-card { page-break-inside:avoid !important; break-inside:avoid !important; }
+  body:not(.printing-pdf) .qr-grid { break-inside:avoid !important; }
+  body:not(.printing-pdf) .qr-section-title,
+  body:not(.printing-pdf) .qr-section-sub { page-break-after:avoid !important; break-after:avoid !important; }
+  body:not(.printing-pdf) .divider { page-break-after:avoid !important; break-after:avoid !important; }
+
+  /* ── SHARED ── */
+  .question-block { page-break-inside:avoid !important; break-inside:avoid !important; }
+  .station-section { page-break-inside:avoid !important; break-inside:avoid !important; margin-bottom:1.5rem !important; }
+  .station-section-body { page-break-inside:avoid !important; break-inside:avoid !important; }
+  .scores-grid { page-break-inside:avoid !important; break-inside:avoid !important; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">ITCA 2026 – Admin</div>
+  <button class="nav-tab active" onclick="showTab('setup',this)">⚙ Setup & QR Codes</button>
+  <button class="nav-tab" onclick="showTab('results',this)">📊 Candidates <span class="badge" id="res-badge">0</span></button>
+  <button class="nav-tab" onclick="showTab('cohort',this)">📈 Cohort</button>
+  <button class="nav-tab" onclick="showTab('consistency',this)">⚖ Examiner Consistency</button>
+</nav>
+
+<!-- BULK MODAL -->
+<div class="modal-overlay" id="bulk-modal">
+  <div class="modal">
+    <h3>Bulk Import Candidates</h3>
+    <p style="font-size:0.83rem;color:var(--muted);margin-bottom:0.75rem">One per line: <code style="background:var(--bg);padding:0.1rem 0.3rem;border-radius:3px;font-family:IBM Plex Mono,monospace">Name, Level</code></p>
+    <textarea id="bulk-text" placeholder="Alice Smith, FY2&#10;Bob Jones, CT1&#10;Carol White, ST3"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeBulkModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="importBulk()">Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SETUP PANEL ════ -->
+<div class="panel active" id="panel-setup">
+<div class="container">
+  <div class="page-title">Setup & QR Codes</div>
+  <div class="page-sub">Configure stations, add candidates, then generate QR codes to print.</div>
+
+  <!-- GOOGLE SHEETS CONFIG -->
+  <div class="config-box" id="config-box">
+    <div class="config-title">🔗 Google Sheets Connection</div>
+    <div class="field" style="margin-top:0.75rem">
+      <label class="fl">Apps Script Web App URL</label>
+      <div style="display:flex;gap:0.5rem">
+        <input type="url" id="sheet-url" placeholder="https://script.google.com/macros/s/…/exec">
+        <button class="btn btn-primary" onclick="saveSheetURL()">Save</button>
+      </div>
+    </div>
+    <div class="config-note" id="config-status">⚠ Not connected. Follow the setup instructions below to get your URL.</div>
+  </div>
+
+  <!-- SETUP INSTRUCTIONS -->
+  <details class="card no-print" style="cursor:pointer">
+    <summary style="font-weight:700;font-size:0.95rem;list-style:none;display:flex;align-items:center;gap:0.5rem">
+      📋 Google Sheets Setup Instructions <span style="color:var(--muted);font-size:0.8rem;margin-left:auto">Click to expand</span>
+    </summary>
+    <div style="margin-top:1rem;font-size:0.88rem;line-height:1.7;color:var(--ink)">
+      <ol style="padding-left:1.25rem">
+        <li style="margin-bottom:0.75rem">Go to <a href="https://sheets.google.com" target="_blank" style="color:var(--accent)">sheets.google.com</a> and create a new spreadsheet named <strong>ITCA 2026 Results</strong></li>
+        <li style="margin-bottom:0.75rem">Click <strong>Extensions → Apps Script</strong></li>
+        <li style="margin-bottom:0.75rem">Delete any existing code and paste the entire contents of <strong>google-apps-script.js</strong> (the third file you downloaded)</li>
+        <li style="margin-bottom:0.75rem">Click <strong>Save</strong> (the floppy disk icon), then click <strong>Deploy → New deployment</strong></li>
+        <li style="margin-bottom:0.75rem">Set type to <strong>Web app</strong>, set "Execute as" to <strong>Me</strong>, set "Who has access" to <strong>Anyone</strong>, then click <strong>Deploy</strong></li>
+        <li style="margin-bottom:0.75rem">Copy the <strong>Web app URL</strong> and paste it into the field above</li>
+        <li>Click <strong>Save</strong> — you're connected!</li>
+      </ol>
+    </div>
+  </details>
+
+  <!-- EXAMINER FORM URL -->
+  <div class="card">
+    <div class="card-title">🔗 Examiner Form URL</div>
+    <div style="font-size:0.85rem;color:var(--muted);margin-bottom:0.75rem">This is the URL examiners open on their devices. The station QR codes will link here.</div>
+    <div style="display:flex;gap:0.5rem">
+      <input type="url" id="form-url" placeholder="https://your-examiner-form.netlify.app">
+      <button class="btn btn-primary" onclick="saveFormURL()">Save</button>
+    </div>
+    <div style="font-size:0.78rem;color:var(--muted);margin-top:0.5rem">Deploy examiner.html to Netlify and paste its URL here before generating QR codes.</div>
+  </div>
+
+  <!-- STATIONS -->
+  <div class="card">
+    <div class="card-title">📍 Stations</div>
+    <div id="stations-container"></div>
+    <button class="btn btn-outline" onclick="addStation()" style="margin-top:0.5rem">+ Add Station</button>
+  </div>
+
+  <!-- CANDIDATES -->
+  <div class="card">
+    <div class="card-title">🎓 Candidates</div>
+    <div id="candidates-container"></div>
+    <div style="display:flex;gap:0.75rem;margin-top:0.5rem;flex-wrap:wrap">
+      <button class="btn btn-outline" onclick="addCandidate()">+ Add Candidate</button>
+      <button class="btn btn-outline" onclick="openBulkModal()">↑ Bulk Import</button>
+    </div>
+  </div>
+
+  <!-- GENERATE -->
+  <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.5rem" class="no-print">
+    <button class="btn btn-primary" onclick="generateQRs()">⚡ Generate QR Codes</button>
+    <button class="btn btn-outline" onclick="window.print()">🖨 Print QR Sheets</button>
+  </div>
+
+  <!-- QR OUTPUT -->
+  <div id="qr-output" style="display:none">
+    <div class="divider"></div>
+    <div class="qr-section-title">📍 Station QR Codes</div>
+    <div class="qr-section-sub">Print and place at each station. Examiner scans once at the start of their session.</div>
+    <div class="qr-grid" id="station-qr-grid"></div>
+
+    <div class="divider"></div>
+    <div class="qr-section-title">🎓 Candidate QR Codes</div>
+    <div class="qr-section-sub">Give each candidate their personal card to carry around the circuit.</div>
+    <div class="qr-grid" id="candidate-qr-grid"></div>
+  </div>
+
+</div>
+</div>
+
+<!-- ════ CANDIDATES PANEL ════ -->
+<div class="panel" id="panel-results">
+<div class="container">
+  <div class="results-toolbar">
+    <div>
+      <div class="page-title">Candidate Results</div>
+      <div class="page-sub" style="margin-bottom:0">Live — last updated: <span id="last-updated">—</span></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary no-print" id="send-results-btn" onclick="sendResults()" style="background:#2e8b57;border-color:#2e8b57;">📨 Send Results Emails</button>
+    <button class="btn btn-outline no-print" onclick="fetchResults()"><span id="refresh-spinner" style="display:none" class="loading-spinner"></span>↻ Refresh</button>
+    <button class="btn btn-outline no-print" onclick="exportCSV()">⬇ CSV</button>
+  </div>
+
+  <div class="summary-grid">
+    <div class="stat-card"><div class="stat-label">Total Submissions</div><div class="stat-value" id="stat-total">0</div><div class="stat-sub">examiner forms received</div></div>
+    <div class="stat-card"><div class="stat-label">Candidates</div><div class="stat-value" id="stat-cands">0</div><div class="stat-sub">with at least 1 station</div></div>
+    <div class="stat-card"><div class="stat-label">Passed</div><div class="stat-value" id="stat-pass" style="color:#2e8b57">—</div><div class="stat-sub">overall exam ≥6</div></div>
+    <div class="stat-card"><div class="stat-label">Failed</div><div class="stat-value" id="stat-fail" style="color:#c62828">—</div><div class="stat-sub">overall exam &lt;6</div></div>
+    <div class="stat-card"><div class="stat-label">Cohort Avg</div><div class="stat-value" id="stat-avg">—</div><div class="stat-sub">across all stations</div></div>
+  </div>
+
+  <div style="display:flex;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap" class="no-print">
+    <select id="filter-station" onchange="renderTable()" style="width:auto;min-width:160px"><option value="">All Stations</option></select>
+    <select id="filter-candidate" onchange="renderTable()" style="width:auto;min-width:180px"><option value="">All Candidates</option></select>
+    <select id="filter-result" onchange="renderTable()" style="width:auto;min-width:130px">
+      <option value="">All Results</option>
+      <option value="PASS">Pass only</option>
+      <option value="FAIL">Fail only</option>
+    </select>
+  </div>
+
+  <div style="overflow-x:auto;background:var(--white);border:1px solid var(--border);border-radius:10px">
+    <table class="result-table">
+      <thead><tr>
+        <th>Candidate</th><th>Level</th><th>Stations</th>
+        <th style="text-align:center">Exam Score</th>
+        <th style="text-align:center">Result</th>
+        <th>Station Breakdown</th>
+        <th>Report</th>
+      </tr></thead>
+      <tbody id="results-tbody">
+        <tr><td colspan="7" class="empty-state">No results yet — waiting for submissions.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- ════ COHORT PANEL ════ -->
+<div class="panel" id="panel-cohort">
+<div class="container">
+  <div class="page-title">Cohort Analysis</div>
+  <div class="page-sub">Average scores and pass rates per station across all candidates. Admin only.</div>
+  <div id="cohort-content"><div class="empty-state" style="padding:3rem">No results yet.</div></div>
+</div>
+</div>
+
+<!-- ════ CONSISTENCY PANEL ════ -->
+<div class="panel" id="panel-consistency">
+<div class="container">
+  <div class="page-title">Examiner Consistency</div>
+  <div class="page-sub">Stations with two examiners — how closely did they agree? Admin only.</div>
+  <div id="consistency-content"><div class="empty-state" style="padding:3rem">No dual-examiner stations found yet.</div></div>
+</div>
+</div>
+
+<script>
+// ── STATE ──
+let stations = [];
+let candidates = [];
+let allResults = [];
+let formURL = '';
+let sheetURL = '';
+let pollInterval = null;
+
+// ── INIT ──
+window.onload = () => {
+  // Load saved config
+  sheetURL = localStorage.getItem('itca_admin_sheet_url') || '';
+  formURL = localStorage.getItem('itca_admin_form_url') || '';
+  if (sheetURL) { document.getElementById('sheet-url').value = sheetURL; updateConfigStatus(true); }
+  if (formURL) document.getElementById('form-url').value = formURL;
+
+  // Default stations
+  ['Station 1','Station 2','Station 3','Station 4','Station 5','Station 6'].forEach(n => addStation({ name: n }));
+};
+
+// ── NAV ──
+function showTab(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (['results','cohort','consistency'].includes(name)) {
+    fetchResults();
+    if (!pollInterval) pollInterval = setInterval(fetchResults, 30000);
+  } else {
+    if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+  }
+}
+
+// ── CONFIG ──
+function saveSheetURL() {
+  sheetURL = document.getElementById('sheet-url').value.trim();
+  localStorage.setItem('itca_admin_sheet_url', sheetURL);
+  updateConfigStatus(!!sheetURL);
+}
+
+function saveFormURL() {
+  formURL = document.getElementById('form-url').value.trim();
+  localStorage.setItem('itca_admin_form_url', formURL);
+  alert('Form URL saved! Regenerate QR codes to apply.');
+}
+
+function updateConfigStatus(connected) {
+  const box = document.getElementById('config-box');
+  const status = document.getElementById('config-status');
+  if (connected) {
+    box.className = 'config-box url-connected';
+    status.textContent = '✓ Connected to Google Sheets';
+    status.style.color = '#2e8b57';
+  } else {
+    box.className = 'config-box';
+    status.textContent = '⚠ Not connected. Follow setup instructions below.';
+    status.style.color = '';
+  }
+}
+
+// ── STATIONS ──
+function addStation(d) {
+  stations.push(d || { name: 'Station ' + (stations.length + 1) });
+  renderStations();
+}
+function removeStation(i) { stations.splice(i, 1); renderStations(); }
+function renderStations() {
+  const c = document.getElementById('stations-container');
+  c.innerHTML = '';
+  stations.forEach((s, i) => {
+    const row = document.createElement('div');
+    row.className = 'station-row';
+    row.style.gridTemplateColumns = '1fr auto';
+    row.innerHTML = `
+      <div class="field" style="margin:0"><label class="fl">Station Name</label>
+        <input type="text" value="${s.name}" placeholder="e.g. Station 1 – Cardiology" onchange="stations[${i}].name=this.value"></div>
+      <button class="remove-btn" onclick="removeStation(${i})">✕</button>`;
+    c.appendChild(row);
+  });
+}
+
+// ── CANDIDATES ──
+function addCandidate(d) {
+  candidates.push(d || { name: '', level: '' });
+  renderCandidates();
+}
+function removeCandidate(i) { candidates.splice(i, 1); renderCandidates(); }
+function renderCandidates() {
+  const c = document.getElementById('candidates-container');
+  c.innerHTML = '';
+  const levels = ['FY1','FY2','CT1','CT2','ST3','ST4','ST5','ST6','ST7','Consultant','Other'];
+  candidates.forEach((ca, i) => {
+    const row = document.createElement('div');
+    row.className = 'candidate-row';
+    row.innerHTML = `
+      <div class="field" style="margin:0"><label class="fl">Name</label>
+        <input type="text" value="${ca.name}" placeholder="Full name" onchange="candidates[${i}].name=this.value"></div>
+      <div class="field" style="margin:0"><label class="fl">Level</label>
+        <select onchange="candidates[${i}].level=this.value">
+          <option value="">Level…</option>
+          ${levels.map(l=>`<option${ca.level===l?' selected':''}>${l}</option>`).join('')}
+        </select></div>
+      <div class="field" style="margin:0"><label class="fl">Email</label>
+        <input type="email" value="${ca.email||''}" placeholder="candidate@nhs.uk" onchange="candidates[${i}].email=this.value"></div>
+      <button class="remove-btn" onclick="removeCandidate(${i})">✕</button>`;
+    c.appendChild(row);
+  });
+}
+
+function openBulkModal() { document.getElementById('bulk-modal').classList.add('open'); }
+function closeBulkModal() { document.getElementById('bulk-modal').classList.remove('open'); }
+function importBulk() {
+  document.getElementById('bulk-text').value.trim().split('\n').forEach(line => {
+    const [name, level, email] = line.split(',').map(s => s.trim());
+    if (name) addCandidate({ name, level: level || '', email: email || '' });
+  });
+  closeBulkModal();
+}
+
+// ── QR GENERATION ──
+function generateQRs() {
+  const base = formURL || location.href.replace('admin.html','examiner.html');
+  const sg = document.getElementById('station-qr-grid');
+  const cg = document.getElementById('candidate-qr-grid');
+  sg.innerHTML = ''; cg.innerHTML = '';
+
+  stations.forEach((s, i) => {
+    const url = base + '?' + new URLSearchParams({ type:'station', station:s.name });
+    makeQR(sg, `${s.name}`, '', url, 'station');
+  });
+
+  candidates.forEach(ca => {
+    const url = base + '?' + new URLSearchParams({ type:'candidate', name:ca.name, level:ca.level, email:ca.email||'' });
+    makeQR(cg, ca.name || '(unnamed)', ca.level || '', url, 'candidate');
+  });
+
+  document.getElementById('qr-output').style.display = 'block';
+  document.getElementById('qr-output').scrollIntoView({ behavior:'smooth' });
+}
+
+function makeQR(grid, title, sub, url, type) {
+  const card = document.createElement('div');
+  card.className = 'qr-card';
+  const uid = 'qr' + Math.random().toString(36).slice(2);
+  card.innerHTML = `
+    <span class="type-badge badge-${type==='station'?'station':'candidate'}">${type==='station'?'📍 Station':'🎓 Candidate'}</span>
+    <div class="qr-wrap" id="${uid}"></div>
+    <div class="qr-name">${title}</div>
+    <div class="qr-sub">${sub}</div>`;
+  grid.appendChild(card);
+  setTimeout(() => {
+    new QRCode(document.getElementById(uid), {
+      text: url, width: 140, height: 140,
+      colorDark: '#1c1c1e', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }, 60);
+}
+
+// ── RESULTS ──
+// ── SCORING LOGIC (mirrors Apps Script) ─────────────────────
+function calcExaminerStationScore(row) {
+  const scores = [];
+  const q1 = parseFloat(row.q1_overall);
+  if (!isNaN(q1) && q1 > 0) scores.push(q1);
+  if (row.q2_gate === 'YES' || row.q2_required === 'YES') {
+    const q2 = parseFloat(row.q2_overall);
+    if (!isNaN(q2) && q2 > 0) scores.push(q2);
+  }
+  if (row.q3_gate === 'YES' || row.q3_required === 'YES') {
+    const q3 = parseFloat(row.q3_overall);
+    if (!isNaN(q3) && q3 > 0) scores.push(q3);
+  }
+  return scores.length ? scores.reduce((a,b)=>a+b,0)/scores.length : null;
+}
+
+function calcStationScore(rows) {
+  const scores = rows.map(calcExaminerStationScore).filter(s => s !== null);
+  return scores.length ? scores.reduce((a,b)=>a+b,0)/scores.length : null;
+}
+
+function calcExamScore(stationScores) {
+  const vals = Object.values(stationScores).filter(s => s !== null);
+  return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+}
+
+function pf(score) { return score === null ? null : score >= 6 ? 'PASS' : 'FAIL'; }
+
+function pfBadge(result) {
+  if (!result) return '';
+  const bg = result==='PASS'?'#e8f5e9':'#ffebeb';
+  const col = result==='PASS'?'#1b5e20':'#c62828';
+  return `<span style="display:inline-block;padding:0.15rem 0.6rem;border-radius:99px;font-size:0.72rem;font-weight:700;background:${bg};color:${col}">${result}</span>`;
+}
+
+function groupByCandidate(results) {
+  const g = {};
+  results.forEach(r => {
+    const n = r.candidate_name||'(unknown)';
+    if (!g[n]) g[n] = { level: r.candidate_level||r.level||'', rows: [] };
+    g[n].rows.push(r);
+  });
+  return g;
+}
+
+function groupByStation(rows) {
+  const g = {};
+  rows.forEach(r => {
+    const s = r.station||'(unknown)';
+    if (!g[s]) g[s] = [];
+    g[s].push(r);
+  });
+  return g;
+}
+
+function buildCandidateSummary(name, data) {
+  const byStation = groupByStation(data.rows);
+  const stationScores = {};
+  Object.entries(byStation).forEach(([st, rows]) => { stationScores[st] = calcStationScore(rows); });
+  const examScore = calcExamScore(stationScores);
+  return {
+    name, level: data.level,
+    examScore, examPass: pf(examScore),
+    stationsCompleted: Object.keys(byStation).length,
+    stationScores, byStation
+  };
+}
+
+// Build cohort averages per station
+function buildCohortStats(grouped) {
+  const cohortByStation = {};
+  Object.values(grouped).forEach(data => {
+    const byStation = groupByStation(data.rows);
+    Object.entries(byStation).forEach(([st, rows]) => {
+      if (!cohortByStation[st]) cohortByStation[st] = [];
+      cohortByStation[st].push(calcStationScore(rows));
+    });
+  });
+  const avg = {};
+  Object.entries(cohortByStation).forEach(([st, scores]) => {
+    const valid = scores.filter(s=>s!==null);
+    avg[st] = valid.length ? parseFloat((valid.reduce((a,b)=>a+b,0)/valid.length).toFixed(2)) : null;
+  });
+  return avg;
+}
+
+// ── STATS ─────────────────────────────────────────────────────
+function updateStats(grouped) {
+  const summaries = Object.entries(grouped).map(([n,d]) => buildCandidateSummary(n,d));
+  document.getElementById('stat-total').textContent = allResults.length;
+  document.getElementById('stat-cands').textContent = summaries.length;
+  document.getElementById('res-badge').textContent = summaries.length;
+
+  const withScore = summaries.filter(s=>s.examScore!==null);
+  const passed = withScore.filter(s=>s.examPass==='PASS').length;
+  const failed = withScore.filter(s=>s.examPass==='FAIL').length;
+  document.getElementById('stat-pass').textContent = withScore.length ? passed : '—';
+  document.getElementById('stat-fail').textContent = withScore.length ? failed : '—';
+
+  const cohort = buildCohortStats(grouped);
+  const cohortVals = Object.values(cohort).filter(v=>v!==null);
+  document.getElementById('stat-avg').textContent = cohortVals.length
+    ? (cohortVals.reduce((a,b)=>a+b,0)/cohortVals.length).toFixed(2) : '—';
+}
+
+function updateFilters(grouped) {
+  const stationSel = document.getElementById('filter-station');
+  const candidateSel = document.getElementById('filter-candidate');
+  const stv = stationSel.value, cv = candidateSel.value;
+  const stns = [...new Set(allResults.map(r=>r.station).filter(Boolean))].sort();
+  const cands = Object.keys(grouped).sort();
+  stationSel.innerHTML = '<option value="">All Stations</option>' + stns.map(s=>`<option${s===stv?' selected':''}>${s}</option>`).join('');
+  candidateSel.innerHTML = '<option value="">All Candidates</option>' + cands.map(c=>`<option${c===cv?' selected':''}>${c}</option>`).join('');
+}
+
+function renderTable() {
+  const stFilter = document.getElementById('filter-station').value;
+  const cFilter  = document.getElementById('filter-candidate').value;
+  const rFilter  = document.getElementById('filter-result').value;
+
+  const filtered = allResults.filter(r =>
+    (!stFilter || r.station === stFilter) &&
+    (!cFilter  || r.candidate_name === cFilter)
+  );
+
+  const grouped = groupByCandidate(filtered);
+  const summaries = Object.entries(grouped)
+    .map(([n,d]) => buildCandidateSummary(n,d))
+    .filter(s => !rFilter || s.examPass === rFilter)
+    .sort((a,b) => (a.name||'').localeCompare(b.name||''));
+
+  if (!summaries.length) {
+    document.getElementById('results-tbody').innerHTML = `<tr><td colspan="7" class="empty-state">No results match your filters.</td></tr>`;
+    return;
+  }
+
+  document.getElementById('results-tbody').innerHTML = summaries.map(s => {
+    const scoreStr = s.examScore !== null ? s.examScore.toFixed(2)+'/8' : '—';
+    const stationBreakdown = Object.entries(s.stationScores).map(([st, sc]) =>
+      `<span style="display:inline-block;margin:0.1rem 0.3rem 0.1rem 0;font-size:0.72rem;">
+        ${st}: <strong>${sc!==null?sc.toFixed(1):'—'}</strong> ${pfBadge(pf(sc))}
+      </span>`
+    ).join('');
+    return `<tr>
+      <td style="font-weight:700">${s.name}</td>
+      <td>${s.level}</td>
+      <td style="color:var(--muted);font-size:0.82rem">${Object.keys(s.byStation).join(', ')}</td>
+      <td style="text-align:center;font-weight:700">${scoreStr}</td>
+      <td style="text-align:center">${pfBadge(s.examPass)}</td>
+      <td style="font-size:0.78rem">${stationBreakdown}</td>
+      <td><button class="btn btn-outline" style="font-size:0.78rem;padding:0.3rem 0.65rem" onclick="showCandidatePDF('${s.name.replace(/'/g,"\'")}')">📄 Report</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderCohort() {
+  const grouped = groupByCandidate(allResults);
+  const cohort = buildCohortStats(grouped);
+  if (!Object.keys(cohort).length) {
+    document.getElementById('cohort-content').innerHTML = '<div class="empty-state" style="padding:3rem">No results yet.</div>';
+    return;
+  }
+
+  // Per-station: avg score, pass rate, candidate count
+  const cohortDetail = {};
+  Object.values(grouped).forEach(data => {
+    const byStation = groupByStation(data.rows);
+    Object.entries(byStation).forEach(([st, rows]) => {
+      if (!cohortDetail[st]) cohortDetail[st] = [];
+      cohortDetail[st].push({ score: calcStationScore(rows), name: data.rows[0].candidate_name });
+    });
+  });
+
+  const rows = Object.entries(cohortDetail).sort(([a],[b])=>a.localeCompare(b)).map(([st, entries]) => {
+    const valid = entries.filter(e=>e.score!==null);
+    const avg = valid.length ? (valid.reduce((a,b)=>a+b.score,0)/valid.length) : null;
+    const passed = valid.filter(e=>e.score>=6).length;
+    const passRate = valid.length ? Math.round(passed/valid.length*100) : null;
+    const barW = avg ? Math.round((avg/8)*100) : 0;
+    const barCol = avg>=6?'#2e8b57':avg>=5?'#bf360c':'#c62828';
+    return `<tr>
+      <td style="font-weight:700">${st}</td>
+      <td style="text-align:center">${entries.length}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:0.5rem">
+          <div style="flex:1;background:#f0f0f5;border-radius:99px;height:8px">
+            <div style="width:${barW}%;background:${barCol};border-radius:99px;height:8px"></div>
+          </div>
+          <span style="font-weight:700;min-width:35px">${avg!==null?avg.toFixed(2):'—'}/8</span>
+        </div>
+      </td>
+      <td style="text-align:center">${passRate!==null?passRate+'%':'—'}</td>
+      <td style="text-align:center">${passed}/${valid.length}</td>
+      <td style="text-align:center">${pfBadge(pf(avg))}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('cohort-content').innerHTML = `
+    <div style="overflow-x:auto;background:var(--white);border:1px solid var(--border);border-radius:10px">
+      <table class="result-table">
+        <thead><tr>
+          <th>Station</th><th style="text-align:center">Candidates</th>
+          <th>Avg Score</th><th style="text-align:center">Pass Rate</th>
+          <th style="text-align:center">Passed</th><th style="text-align:center">Status</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderConsistency() {
+  const grouped = groupByCandidate(allResults);
+  const inconsistencies = [];
+
+  Object.entries(grouped).forEach(([name, data]) => {
+    const byStation = groupByStation(data.rows);
+    Object.entries(byStation).forEach(([st, rows]) => {
+      if (rows.length < 2) return;
+      const scores = rows.map(r => ({
+        examiner: r.examiner||'—',
+        score: calcExaminerStationScore(r)
+      })).filter(e=>e.score!==null);
+      if (scores.length < 2) return;
+      const diff = Math.abs(scores[0].score - scores[1].score);
+      inconsistencies.push({ name, station: st, scores, diff, stationAvg: calcStationScore(rows) });
+    });
+  });
+
+  if (!inconsistencies.length) {
+    document.getElementById('consistency-content').innerHTML = '<div class="empty-state" style="padding:3rem">No dual-examiner stations found yet.</div>';
+    return;
+  }
+
+  inconsistencies.sort((a,b)=>b.diff-a.diff);
+
+  const rows = inconsistencies.map(item => {
+    const diffCol = item.diff>=2?'#c62828':item.diff>=1?'#bf360c':'#2e8b57';
+    const examinerCells = item.scores.map(e =>
+      `<span style="font-size:0.78rem;display:block">${e.examiner}: <strong>${e.score.toFixed(1)}</strong></span>`
+    ).join('');
+    return `<tr>
+      <td style="font-weight:700">${item.name}</td>
+      <td>${item.station}</td>
+      <td>${examinerCells}</td>
+      <td style="text-align:center;font-weight:700">${item.stationAvg!==null?item.stationAvg.toFixed(2):'—'}</td>
+      <td style="text-align:center;font-weight:800;color:${diffCol}">${item.diff.toFixed(1)}</td>
+      <td style="text-align:center">${item.diff>=2?'⚠ Review':item.diff>=1?'△ Minor':'✓ Agree'}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('consistency-content').innerHTML = `
+    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem">Sorted by largest discrepancy. ⚠ = difference ≥2, △ = difference ≥1.</p>
+    <div style="overflow-x:auto;background:var(--white);border:1px solid var(--border);border-radius:10px">
+      <table class="result-table">
+        <thead><tr>
+          <th>Candidate</th><th>Station</th><th>Examiner Scores</th>
+          <th style="text-align:center">Station Avg</th>
+          <th style="text-align:center">Difference</th>
+          <th style="text-align:center">Flag</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+async function sendResults() {
+  if (!sheetURL) { alert('Not connected to Google Sheets.'); return; }
+  if (!confirm('Send results emails to all candidates now? This will email every candidate who has at least one score recorded.')) return;
+  const btn = document.getElementById('send-results-btn');
+  btn.disabled = true;
+  btn.textContent = '📨 Sending…';
+  try {
+    const resp = await fetch(sheetURL + '?action=sendResults');
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+    alert(`✓ Results sent!
+
+${data.sent} email(s) sent.
+${data.skipped} candidate(s) skipped (no email address).`);
+  } catch(e) {
+    alert('⚠ Error sending results: ' + e.message);
+  }
+  btn.disabled = false;
+  btn.textContent = '📨 Send Results Emails';
+}
+
+async function fetchResults() {
+  if (!sheetURL) {
+    document.getElementById('results-tbody').innerHTML = '<tr><td colspan="6" class="empty-state">⚠ Not connected to Google Sheets. Add your Apps Script URL in the Setup tab.</td></tr>';
+    return;
+  }
+
+  document.getElementById('refresh-spinner').style.display = 'inline-block';
+
+  try {
+    const resp = await fetch(sheetURL + '?action=get');
+    const data = await resp.json();
+    // Normalise all keys: handle both raw sheet headers and already-normalised keys
+    // Raw sheet headers have spaces/capitals e.g. "Candidate Name", "Q1 Basic Knowledge"
+    const normKey = k => k.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/, '');
+    allResults = (data.results || []).map(raw => {
+      // First, normalise all keys
+      const r = {};
+      Object.keys(raw).forEach(k => { r[normKey(k)] = raw[k]; });
+      // Then fix remaining mismatches
+      r.candidate_name  = r.candidate_name  || '';
+      r.candidate_level = r.candidate_level || r.level || '';
+      r.station         = r.station         || '';
+      r.examiner        = r.examiner        || '';
+      r.timestamp       = r.timestamp       || '';
+      r.q2_gate         = r.q2_gate         || r.q2_required || '';
+      r.q3_gate         = r.q3_gate         || r.q3_required || '';
+      return r;
+    });
+    document.getElementById('last-updated').textContent = new Date().toLocaleTimeString('en-GB');
+    const grouped = groupByCandidate(allResults);
+    updateStats(grouped);
+    updateFilters(grouped);
+    renderTable();
+    renderCohort();
+    renderConsistency();
+  } catch(e) {
+    document.getElementById('results-tbody').innerHTML = `<tr><td colspan="6" class="empty-state">⚠ Could not fetch results. Check your Apps Script URL.</td></tr>`;
+  }
+
+  document.getElementById('refresh-spinner').style.display = 'none';
+}
+
+
+
+function formatTimestamp(ts) {
+  if (!ts) return '';
+  try {
+    const d = new Date(ts);
+    if (isNaN(d)) return ts; // return as-is if not parseable
+    return d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) + 
+           ' ' + d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+  } catch(e) { return ts; }
+}
+
+function scoreChip(v) {
+  if (!v) return '';
+  return `<span class="score-pill s${v}">${v}</span>`;
+}
+
+function exportCSV() {
+  if (!allResults.length) { alert('No results to export.'); return; }
+  const headers = ['Timestamp','Station','Examiner','Candidate Name','Level',
+    'Q1 Topic','Q1 Basic Knowledge','Q1 Higher Order','Q1 Professionalism','Q1 Overall','Q1 Comments',
+    'Q2 Required','Q2 Examiner Changed','Q2 Topic','Q2 Basic Knowledge','Q2 Higher Order','Q2 Professionalism','Q2 Overall','Q2 Comments',
+    'Q3 Required','Q3 Examiner Changed','Q3 Topic','Q3 Basic Knowledge','Q3 Higher Order','Q3 Professionalism','Q3 Overall','Q3 Comments'];
+  const rows = allResults.map(r => [
+    r.timestamp,r.station,r.examiner,r.candidate_name,r.candidate_level,
+    r.q1_topic,r.q1_basic_knowledge,r.q1_higher_order,r.q1_professionalism,r.q1_overall,r.q1_comments,
+    r.q2_gate,r.q2_examiner_changed,r.q2_topic,r.q2_basic_knowledge,r.q2_higher_order,r.q2_professionalism,r.q2_overall,r.q2_comments,
+    r.q3_gate,r.q3_examiner_changed,r.q3_topic,r.q3_basic_knowledge,r.q3_higher_order,r.q3_professionalism,r.q3_overall,r.q3_comments
+  ].map(v=>`"${(v||'').toString().replace(/"/g,'""')}"`).join(','));
+  const csv = [headers.join(','),...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = `itca2026-results-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+// ── PDF GENERATION ──
+let currentPDFCandidate = null;
+
+function scoreBox(val, label) {
+  if (!val) return '';
+  const cls = 'sb' + val;
+  const labels = {
+    '4':'Clear Fail','5':'Borderline Fail','6':'Pass','7':'Good Pass','8':'Outstanding'
+  };
+  return `<div class="score-box ${cls}">
+    <div class="sb-label">${label}</div>
+    <div class="sb-val">${val}</div>
+  </div>`;
+}
+
+function domainScoreBox(val, label) {
+  if (!val) return `<div class="score-box" style="background:#f0f0f5;color:#999"><div class="sb-label">${label}</div><div class="sb-val">—</div></div>`;
+  const cls = 'sb' + val;
+  const descs = {
+    basic_knowledge: { 4:'Very weak',5:'Limited',6:'Competent',7:'Good',8:'Excellent' },
+    higher_order:    { 4:'Disorganised',5:'Poor org.',6:'Adequate',7:'Good',8:'Excellent' },
+    professionalism: { 4:'Abrupt/rude',5:'Unsympathetic',6:'Respectful',7:'Good rapport',8:'Excellent' }
+  };
+  return `<div class="score-box ${cls}">
+    <div class="sb-label">${label}</div>
+    <div class="sb-val">${val}</div>
+  </div>`;
+}
+
+function buildQuestionBlock(r, qNum) {
+  const gate = r[`q${qNum}_gate`];
+  const topic = r[`q${qNum}_topic`];
+  const basic = r[`q${qNum}_basic_knowledge`];
+  const higher = r[`q${qNum}_higher_order`];
+  const prof = r[`q${qNum}_professionalism`];
+  const overall = r[`q${qNum}_overall`];
+  const comments = r[`q${qNum}_comments`];
+  const examChanged = r[`q${qNum}_examiner_changed`];
+
+  // For Q2/Q3, skip if gate was not YES
+  if (qNum > 1 && gate !== 'YES') return '';
+
+  const overallLabels = {'4':'Clear Fail','5':'Borderline Fail','6':'Pass; min standard','7':'Good Pass','8':'Outstanding'};
+  const overallDesc = overall ? (overallLabels[overall] || '') : '';
+
+  return `<div class="question-block">
+    <div class="qb-title">Question ${qNum}${qNum > 1 && examChanged === 'YES' ? ' <span style="font-size:0.7rem;background:#fff0e8;color:#bf360c;padding:0.1rem 0.4rem;border-radius:3px;font-weight:600">Examiner changed</span>' : ''}</div>
+    ${topic ? `<div class="qb-topic">Topic: ${topic}</div>` : ''}
+    <div class="scores-grid">
+      ${domainScoreBox(basic, 'Basic Knowledge')}
+      ${domainScoreBox(higher, 'Higher Order Thinking')}
+      ${domainScoreBox(prof, 'Professionalism')}
+      ${overall ? `<div class="score-box overall sb${overall}">
+        <div><div class="sb-label">Overall</div><div style="font-size:0.8rem;opacity:0.85">${overallDesc}</div></div>
+        <div class="sb-val">${overall}/8</div>
+      </div>` : ''}
+    </div>
+    ${comments ? `<div class="comments-label">Comments</div><div class="comments-box">${comments}</div>` : ''}
+  </div>`;
+}
+
+function showCandidatePDF(candidateName) {
+  currentPDFCandidate = candidateName;
+  const candidateRows = allResults.filter(r => r.candidate_name === candidateName);
+  if (!candidateRows.length) return;
+
+  const first = candidateRows[0];
+  const level = first.candidate_level || '';
+  const date = new Date().toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+
+  // Group by station, show station score and per-examiner breakdown
+  const byStation = groupByStation(candidateRows);
+  const stationScores = {};
+  Object.entries(byStation).forEach(([st,rows])=>{ stationScores[st]=calcStationScore(rows); });
+  const examScore = calcExamScore(stationScores);
+  const examPassResult = pf(examScore);
+
+  let stationSections = Object.entries(byStation).map(([stName, rows]) => {
+    const stScore = stationScores[stName];
+    const stPass  = pf(stScore);
+    const pfCol   = stPass==='PASS'?'#1b5e20':'#c62828';
+    const pfBg2   = stPass==='PASS'?'#e8f5e9':'#ffebeb';
+
+    // Group by question — show Q1 from all examiners, then Q2 from all examiners, etc.
+    const maxQs = rows.reduce((max, r) => {
+      let q = 1;
+      if (r.q2_gate==='YES'||r.q2_required==='YES') q=2;
+      if (r.q3_gate==='YES'||r.q3_required==='YES') q=3;
+      return Math.max(max,q);
+    }, 1);
+
+    const questionBlocks = [];
+    for (let qNum=1; qNum<=maxQs; qNum++) {
+      // Find rows where this question was asked
+      const qRows = rows.filter(r => {
+        if (qNum===1) return true;
+        const gate = r[`q${qNum}_gate`]||r[`q${qNum}_required`]||'';
+        return gate==='YES';
+      });
+      if (!qRows.length) continue;
+
+      // Topic — use first non-empty topic
+      const topic = qRows.map(r=>r[`q${qNum}_topic`]).filter(Boolean)[0]||'';
+
+      // Per-examiner score blocks within this question
+      const exBlocks = qRows.map(r => {
+        const basic   = r[`q${qNum}_basic_knowledge`];
+        const higher  = r[`q${qNum}_higher_order`];
+        const prof    = r[`q${qNum}_professionalism`];
+        const overall = r[`q${qNum}_overall`];
+        const comments= r[`q${qNum}_comments`];
+        const overallLabels = {'4':'Clear Fail','5':'Borderline Fail','6':'Pass; min standard','7':'Good Pass','8':'Outstanding'};
+        const overallDesc = overall ? (overallLabels[overall]||'') : '';
+        return `<div style="border-left:3px solid #e5e7eb;padding-left:0.75rem;margin-bottom:0.75rem">
+          ${r.examiner?`<div style="font-size:0.7rem;font-weight:700;color:#6e6e73;margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.05em">Examiner: ${r.examiner}</div>`:''}
+          <div class="scores-grid">
+            ${domainScoreBox(basic,'Basic Knowledge')}
+            ${domainScoreBox(higher,'Higher Order Thinking')}
+            ${domainScoreBox(prof,'Professionalism')}
+            ${overall?`<div class="score-box overall sb${overall}">
+              <div><div class="sb-label">Overall</div><div style="font-size:0.8rem;opacity:0.85">${overallDesc}</div></div>
+              <div class="sb-val">${overall}/8</div>
+            </div>`:''}
+          </div>
+          ${comments?`<div class="comments-label">Comments</div><div class="comments-box">${comments}</div>`:''}
+        </div>`;
+      }).join('');
+
+      questionBlocks.push(`<div class="question-block">
+        <div class="qb-title">Question ${qNum}</div>
+        ${topic?`<div class="qb-topic">Topic: ${topic}</div>`:''}
+        ${exBlocks}
+      </div>`);
+    }
+    const examinerBlocks = questionBlocks.join('');
+
+    return `<div class="station-section">
+      <div class="station-section-header">
+        <span class="ssh-name">${stName}</span>
+        <span style="margin-left:auto;font-size:0.8rem;font-weight:700;padding:0.2rem 0.7rem;border-radius:99px;background:${pfBg2};color:${pfCol}">${stPass||'—'} ${stScore!==null?stScore.toFixed(2)+'/8':''}</span>
+      </div>
+      <div class="station-section-body">${examinerBlocks}</div>
+    </div>`;
+  }).join('');
+
+  const pfCol2   = examPassResult==='PASS'?'#1b5e20':'#c62828';
+  const pfBg3    = examPassResult==='PASS'?'#e8f5e9':'#ffebeb';
+  const html = `<div class="report-card">
+    <div class="report-header">
+      <div class="rh-title">ITCA 2026 – Candidate Assessment Report</div>
+      <div class="rh-sub">In Training Clinical Assessment</div>
+      <div class="rh-meta">
+        <span><span class="meta-label">Candidate</span><span class="meta-val">${candidateName}</span></span>
+        <span><span class="meta-label">Level</span><span class="meta-val">${level || '—'}</span></span>
+        <span><span class="meta-label">Stations Sat</span><span class="meta-val">${Object.keys(byStation).length}</span></span>
+        <span><span class="meta-label">Exam Score</span><span class="meta-val">${examScore!==null?examScore.toFixed(2)+'/8':'—'}</span></span>
+        <span><span class="meta-label">Overall Result</span><span class="meta-val" style="color:${pfCol2};font-weight:800">${examPassResult||'—'}</span></span>
+        <span><span class="meta-label">Generated</span><span class="meta-val">${date}</span></span>
+      </div>
+    </div>
+    ${stationSections}
+    <div class="report-footer">
+      <span>ITCA 2026 – Confidential Assessment Document</span>
+      <span>Generated ${date}</span>
+    </div>
+  </div>`;
+
+  document.getElementById('report-card-content').innerHTML = html;
+  document.getElementById('pdf-modal-title').textContent = `${candidateName} – Report`;
+  document.getElementById('pdf-modal').classList.add('open');
+  document.getElementById('email-subject').value = `ITCA 2026 – Your Results: ${candidateName}`;
+}
+
+function closePDFModal() {
+  document.getElementById('pdf-modal').classList.remove('open');
+}
+
+function printPDF() {
+  const originalTitle = document.title;
+  document.title = currentPDFCandidate ? currentPDFCandidate + ' – ITCA 2026 Assessment' : 'ITCA 2026 Assessment';
+  document.body.classList.add('printing-pdf');
+  window.print();
+  document.body.classList.remove('printing-pdf');
+  document.title = originalTitle;
+}
+
+// ── EMAIL ──
+function openEmailModal() {
+  document.getElementById('email-modal').classList.add('open');
+}
+function closeEmailModal() {
+  document.getElementById('email-modal').classList.remove('open');
+}
+
+function sendEmail() {
+  const to = document.getElementById('email-to').value.trim();
+  const subject = document.getElementById('email-subject').value.trim();
+  if (!to) { alert('Please enter a recipient email.'); return; }
+
+  // Build plain text version of the report for email body
+  const candidateRows = allResults.filter(r => r.candidate_name === currentPDFCandidate);
+  let body = `ITCA 2026 – Candidate Assessment Report\n`;
+  body += `Candidate: ${currentPDFCandidate}\n`;
+  body += `Level: ${candidateRows[0]?.candidate_level || '—'}\n`;
+  body += `Generated: ${new Date().toLocaleDateString('en-GB')}\n\n`;
+
+  candidateRows.forEach(r => {
+    body += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    body += `STATION: ${r.station}${r.examiner ? ' (Examiner: ' + r.examiner + ')' : ''}\n\n`;
+    body += `Question 1${r.q1_topic ? ' – ' + r.q1_topic : ''}\n`;
+    body += `  Basic Knowledge: ${r.q1_basic_knowledge || '—'}  |  Higher Order: ${r.q1_higher_order || '—'}  |  Professionalism: ${r.q1_professionalism || '—'}\n`;
+    body += `  Overall: ${r.q1_overall || '—'}/8\n`;
+    if (r.q1_comments) body += `  Comments: ${r.q1_comments}\n`;
+    if (r.q2_gate === 'YES') {
+      body += `\nQuestion 2${r.q2_topic ? ' – ' + r.q2_topic : ''}\n`;
+      body += `  Basic Knowledge: ${r.q2_basic_knowledge || '—'}  |  Higher Order: ${r.q2_higher_order || '—'}  |  Professionalism: ${r.q2_professionalism || '—'}\n`;
+      body += `  Overall: ${r.q2_overall || '—'}/8\n`;
+      if (r.q2_comments) body += `  Comments: ${r.q2_comments}\n`;
+    }
+    if (r.q3_gate === 'YES') {
+      body += `\nQuestion 3${r.q3_topic ? ' – ' + r.q3_topic : ''}\n`;
+      body += `  Basic Knowledge: ${r.q3_basic_knowledge || '—'}  |  Higher Order: ${r.q3_higher_order || '—'}  |  Professionalism: ${r.q3_professionalism || '—'}\n`;
+      body += `  Overall: ${r.q3_overall || '—'}/8\n`;
+      if (r.q3_comments) body += `  Comments: ${r.q3_comments}\n`;
+    }
+    body += `\n`;
+  });
+
+  body += `\n---\nThis report was generated by the ITCA 2026 circuit assessment system.`;
+
+  const mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = mailto;
+  closeEmailModal();
+  closePDFModal();
+}
+</script>
+
+<!-- PDF PREVIEW MODAL -->
+<div class="pdf-modal-overlay" id="pdf-modal">
+  <div class="pdf-modal">
+    <div class="pdf-modal-toolbar">
+      <span class="pdf-title" id="pdf-modal-title">Candidate Report</span>
+      <button class="btn btn-outline" style="background:transparent;color:white;border-color:#ffffff44;font-size:0.8rem" onclick="printPDF()">🖨 Print / Save PDF</button>
+      <button class="btn btn-outline" style="background:transparent;color:white;border-color:#ffffff44;font-size:0.8rem" onclick="openEmailModal()">✉ Email</button>
+      <button class="btn btn-outline" style="background:transparent;color:white;border-color:#ffffff44;font-size:0.8rem" onclick="closePDFModal()">✕ Close</button>
+    </div>
+    <div id="report-card-content"></div>
+  </div>
+</div>
+
+<!-- EMAIL MODAL -->
+<div class="modal-overlay" id="email-modal">
+  <div class="email-modal">
+    <h3>✉ Email Report</h3>
+    <p style="font-size:0.83rem;color:var(--muted);margin-bottom:1rem">This will open your email client with the report attached as text. For a PDF attachment, use Print → Save as PDF first, then attach manually.</p>
+    <div class="field">
+      <label class="fl">Recipient Email</label>
+      <input type="text" id="email-to" placeholder="candidate@hospital.nhs.uk">
+    </div>
+    <div class="field">
+      <label class="fl">Subject</label>
+      <input type="text" id="email-subject" placeholder="ITCA 2026 – Your Results">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeEmailModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="sendEmail()">Open in Mail →</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
